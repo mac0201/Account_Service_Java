@@ -35,3 +35,4 @@ course-remote-info.yaml
 /Account Service (Java)/task/out/
 # Do not ignore task folder
 !/Account Service (Java)/task
+/Account Service (Java)/task/accounts.trace.db
