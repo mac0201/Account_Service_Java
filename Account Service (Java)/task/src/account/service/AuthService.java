@@ -7,6 +7,8 @@ import account.model.dto.UserRegistrationDTO;
 import account.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +25,7 @@ public class AuthService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
 
     public AuthService(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -31,22 +34,27 @@ public class AuthService implements UserDetailsService {
     }
 
     public User findUser(String email) {
-        return userRepository.findByEmail(email).orElseThrow(CustomExceptions.UserNotFoundException::new);
+        return userRepository.findByEmailIgnoreCase(email).orElseThrow(CustomExceptions.UserNotFoundException::new);
     }
 
     @Transactional
     public User registerUser(UserRegistrationDTO registrationDTO) {
-        if (userRepository.existsByEmail(registrationDTO.getEmail()))
+        if (userRepository.existsByEmailIgnoreCase(registrationDTO.getEmail())) {
+            LOGGER.info("User with email {} already exists", registrationDTO.getEmail());
             throw new CustomExceptions.UserAlreadyExistsException();
+        }
         User user = modelMapper.map(registrationDTO, User.class);
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
         user.setAuthorities(List.of("ROLE_USER"));
+        LOGGER.info("User registered - {}", user.getEmail());
         return userRepository.save(user);
     }
 
     @Transactional
     public User updatePassword(PasswordResetDTO resetDTO, String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(CustomExceptions.UserNotFoundException::new);
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> {
+            LOGGER.info("User with email {} not found", userEmail);
+            return new CustomExceptions.UserNotFoundException(); });
         user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
         return userRepository.save(user);
     }

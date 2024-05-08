@@ -33,6 +33,7 @@ public class SecurityConfig {
         return http
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(toH2Console()).permitAll()
+                    .requestMatchers(HttpMethod.POST, "/actuator/shutdown").permitAll()
                     // AUTH
                     .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/changepass").hasAnyRole(
@@ -59,7 +60,6 @@ public class SecurityConfig {
     static class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         @Override
         public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-            System.out.println("HIIIIIII");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
         }
     }

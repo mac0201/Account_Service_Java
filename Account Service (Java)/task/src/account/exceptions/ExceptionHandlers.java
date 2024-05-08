@@ -23,7 +23,7 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     // Handler specifically for ResponseStatusException
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) { //, ResponseStatus responseStatus
-        ErrorResponse response = new ErrorResponse(ex.getStatusCode().value(), ex.getMessage(), request.getServletPath());
+        ErrorResponse response = new ErrorResponse(ex.getStatusCode().value(), ex.getStatusCode().toString(), ex.getMessage(), request.getServletPath());
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
 
@@ -31,7 +31,8 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     @ExceptionHandler({RequestValidationException.class, UserAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleRequestValidationException(RuntimeException ex, HttpServletRequest request) {
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getServletPath());
+//        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getServletPath());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(), request.getServletPath());
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -40,7 +41,7 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         String path = ((ServletWebRequest) request).getRequest().getServletPath();
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), path);
+        ErrorResponse response = new ErrorResponse(400, "Bad Request", ex.getMessage(), path);
         return ResponseEntity.badRequest().body(response);
     }
 
