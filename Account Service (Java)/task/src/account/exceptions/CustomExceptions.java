@@ -17,7 +17,10 @@ public class CustomExceptions {
         }
     }
 
-//    public static class RequestValidationException extends RuntimeException {}
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public static class RequestValidationException extends RuntimeException {
+        public RequestValidationException() { super("Request parameter validation failed"); }
+    }
 
 
 }

@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PasswordResetDTO {
-//    @JsonProperty("user_id")
-    private long userId;
+////    @JsonProperty("user_id")
+//    private long userId;
     @JsonProperty("password")
     private String currentPassword;
     @JsonProperty("new_password")

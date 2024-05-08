@@ -17,6 +17,7 @@ public class PayrollController {
 
     @GetMapping("/empl/payment")
     public ResponseEntity<String> getEmployeePayroll() {
+        System.out.println("VALID!");
         return ResponseEntity.ok().build();
     }
 

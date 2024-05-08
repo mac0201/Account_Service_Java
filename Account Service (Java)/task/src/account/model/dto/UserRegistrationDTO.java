@@ -8,20 +8,22 @@ import lombok.*;
 @AllArgsConstructor
 @Setter
 @Getter
-@ToString
+//@ToString
 //@JsonIgnoreProperties
 public class UserRegistrationDTO {
-        @NotBlank @NotNull
+        @NotBlank
         @Size(min = 2, max = 30)
         private String name;
-        @NotBlank @NotNull
+
+        @NotBlank
         @Size(min = 2, max = 30)
         private String lastname;
+
         @Email
         @NotBlank
-//        @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
-        @Pattern(regexp = "^.+@acme.com$")
+        @Pattern(regexp = "^.+@acme\\.com$")
         private String email;
+
         @NotBlank
         @Size(min = 5, max = 30) // @ToString.Exclude
         private String password;
