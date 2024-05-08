@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10, new SecureRandom());
+        return new BCryptPasswordEncoder(15, new SecureRandom());
     }
 
     @Bean
@@ -63,5 +62,4 @@ public class SecurityConfig {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
         }
     }
-
 }

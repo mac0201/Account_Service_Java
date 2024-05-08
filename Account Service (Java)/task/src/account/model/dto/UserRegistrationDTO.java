@@ -1,6 +1,5 @@
 package account.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -8,8 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Setter
 @Getter
-//@ToString
-//@JsonIgnoreProperties
 public class UserRegistrationDTO {
         @NotBlank
         @Size(min = 2, max = 30)
@@ -25,7 +22,9 @@ public class UserRegistrationDTO {
         private String email;
 
         @NotBlank
-        @Size(min = 5, max = 30) // @ToString.Exclude
+        @ToString.Exclude
         private String password;
 
+        // Set email to lowercase
+        public void setEmail(String email) { this.email = email.toLowerCase(); }
 }

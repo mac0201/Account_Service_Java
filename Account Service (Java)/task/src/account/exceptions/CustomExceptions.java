@@ -9,12 +9,9 @@ public class CustomExceptions {
         public UserNotFoundException() { super("User not found!"); }
     }
 
-    // METHOD 2
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public static class UserAlreadyExistsException extends RuntimeException {
-        public UserAlreadyExistsException() {
-            super("User exist!");
-        }
+        public UserAlreadyExistsException() { super("User exist!"); }
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -22,5 +19,9 @@ public class CustomExceptions {
         public RequestValidationException() { super("Request parameter validation failed"); }
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public static class PasswordValidationException extends RuntimeException {
+        public PasswordValidationException(String message) { super(message); }
+    }
 
 }

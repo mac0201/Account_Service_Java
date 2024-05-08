@@ -2,7 +2,6 @@ package account.controller;
 
 
 import account.service.PayrollService;
-import org.h2.util.json.JSONString;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,6 @@ public class PayrollController {
 
     @GetMapping("/empl/payment")
     public ResponseEntity<Object> getEmployeePayroll() {
-        System.out.println("VALID!");
         return ResponseEntity.ok().body(payrollService.getUser());
     }
 

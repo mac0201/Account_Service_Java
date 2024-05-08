@@ -28,10 +28,9 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     }
 
     //!! **************************************************** CUSTOM EXCEPTIONS
-    @ExceptionHandler({RequestValidationException.class, UserAlreadyExistsException.class})
+    @ExceptionHandler({RequestValidationException.class, UserAlreadyExistsException.class, PasswordValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleRequestValidationException(RuntimeException ex, HttpServletRequest request) {
-//        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getServletPath());
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(), request.getServletPath());
         return ResponseEntity.badRequest().body(response);
     }
@@ -44,28 +43,5 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
         ErrorResponse response = new ErrorResponse(400, "Bad Request", ex.getMessage(), path);
         return ResponseEntity.badRequest().body(response);
     }
-
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    @Override
-//    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-//        ErrorResponse response = new ErrorResponse(status.value(), ex.getMessage(), request.getDescription(false));
-//        return ResponseEntity.badRequest().body(response);
-//    }
-
-    //
-//    @ExceptionHandler(RuntimeException.class)
-//    @ResponseBody
-//    private ResponseEntity<Object> handleCustomExceptions(RuntimeException ex, HttpServletRequest request) throws JsonProcessingException {
-//        int statusCode = extractStatusCode(ex);
-//        ErrorResponse responseObject = new ErrorResponse(statusCode, ex.getMessage(), request.getServletPath());
-//        return ResponseEntity.status(statusCode).build();
-////        return ResponseEntity.status(statusCode).body("{}");
-//    }
-//
-//    private int extractStatusCode(RuntimeException ex) {
-//        Class<? extends RuntimeException> exceptionClass = ex.getClass();
-//        ResponseStatus annotation = exceptionClass.getAnnotation(ResponseStatus.class);
-//        return annotation != null ? annotation.value().value() : HttpStatus.INTERNAL_SERVER_ERROR.value();
-//    }
 
 }

@@ -1,6 +1,7 @@
 package account.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,51 +18,47 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@JsonIncludeProperties({ "id", "name", "lastname", "email" })
+@JsonPropertyOrder({ "id", "name", "lastname", "email" })
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1, initialValue = 200)
+    @GeneratedValue(generator = "user_seq")
     @Column(name = "user_id")
     private long id;
     private String name;
     private String lastname;
     private String email;
-    @JsonIgnore
     private String password;
-    @JsonIgnore
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> authorities;
 
-    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities.stream().map(SimpleGrantedAuthority::new).toList();
     }
 
-    @JsonIgnore
     @Override
     public String getUsername() {
         return this.email;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;

@@ -21,6 +21,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
@@ -36,15 +37,8 @@ public class AuthController {
     // change password
     @PostMapping("/changepass")
     public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordResetDTO reset, @AuthenticationPrincipal UserDetails userDetails) throws JsonProcessingException {
-        User user = authService.updatePassword(reset, userDetails.getUsername());
-        //! later - confirm password provided in request matches current password, then update
-        return ResponseEntity.ok().body(user);
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        authService.testUser();
-        return ResponseEntity.ok().build();
+        PasswordResetDTO response = authService.updatePassword(reset, userDetails.getUsername());
+        return ResponseEntity.ok().body(response);
     }
 
 }
