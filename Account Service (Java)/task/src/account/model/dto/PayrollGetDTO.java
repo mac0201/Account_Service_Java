@@ -1,17 +1,12 @@
 package account.model.dto;
 
 import account.exceptions.CustomExceptions;
-import account.util.PayrollUtils;
+import static account.util.PayrollUtils.periodInputFormatter;
+import static account.util.PayrollUtils.periodOutputFormatter;
+
 import lombok.Data;
-
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.Calendar;
-import java.util.Date;
 
-import static account.util.PayrollUtils.*;
 
 @Data
 public class PayrollGetDTO {
@@ -37,8 +32,8 @@ public class PayrollGetDTO {
     // Accept period in MM-YYYY format and return Month-YYYY, e.g. 03-2021 -> March-2021
     private String formatPeriod(String period) {
         try {
-            return periodInputFormatter.format(
-                    periodOutputFormatter.parse(period));
+            return periodOutputFormatter.format(
+                    periodInputFormatter.parse(period));
         } catch (ParseException ex) {
             throw new CustomExceptions.RequestValidationException();
         }

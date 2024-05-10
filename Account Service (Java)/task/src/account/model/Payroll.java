@@ -1,9 +1,7 @@
 package account.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 
 @Entity
 // Add table unique constraint for columns employee and period

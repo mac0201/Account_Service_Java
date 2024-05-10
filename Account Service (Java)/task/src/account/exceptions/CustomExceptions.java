@@ -29,5 +29,4 @@ public class CustomExceptions {
         public PayrollNotFoundException(String message) { super(message); }
     }
 
-
 }

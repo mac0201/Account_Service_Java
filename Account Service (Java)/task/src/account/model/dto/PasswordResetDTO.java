@@ -11,15 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PasswordResetDTO {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("new_password")
     private String newPassword;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String status;
 
     public PasswordResetDTO(String email, String status) {

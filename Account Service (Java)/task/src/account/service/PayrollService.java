@@ -8,16 +8,11 @@ import account.model.dto.PayrollGetDTO;
 import account.repository.PayrollRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-import java.time.Period;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static account.util.PayrollUtils.periodInputFormatter;
@@ -25,13 +20,11 @@ import static account.util.PayrollUtils.periodInputFormatter;
 @Service
 public class PayrollService {
 
-    private final static String PAYROLL_REGEX = "^((0[1-9])|(1[0-2]))-(\\d{4})$";
-
     private final AuthService authService;
     private final PayrollRepository payrollRepository;
     private final ModelMapper modelMapper;
 
-    private final Comparator<PayrollGetDTO> payrollPeriodComparator = (o1, o2) -> {
+    private final Comparator<Payroll> payrollPeriodComparator = (o1, o2) -> {
         try {
             Date d1 = periodInputFormatter.parse(o1.getPeriod());
             Date d2 = periodInputFormatter.parse(o2.getPeriod());
@@ -45,11 +38,6 @@ public class PayrollService {
         this.authService = authService;
         this.payrollRepository = payrollRepository;
         this.modelMapper = modelMapper;
-    }
-
-    public User getUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return authService.findUser(auth.getName());
     }
 
     @Transactional
@@ -83,11 +71,14 @@ public class PayrollService {
                         ? payrollRepository.findAllByEmployeeEmail(empEmail)
                         : payrollRepository.findAllByEmployeeEmailAndPeriod(empEmail, period);
         // Convert each Payroll entity to DTO and update names. Sort in descending order using custom comparator
-        return payrolls.map(payroll -> {
-            PayrollGetDTO dto = modelMapper.map(payroll, PayrollGetDTO.class);
-            dto.setName(user.getName());
-            dto.setLastname(user.getLastname());
-            return dto;
-        }).sorted(payrollPeriodComparator.reversed()).toList();
+        return payrolls
+                .sorted(payrollPeriodComparator.reversed())
+                .map(payroll -> {
+                        PayrollGetDTO dto = modelMapper.map(payroll, PayrollGetDTO.class);
+                        dto.setName(user.getName());
+                        dto.setLastname(user.getLastname());
+                        return dto;
+                    })
+                .toList();
     }
 }

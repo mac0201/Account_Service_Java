@@ -1,5 +1,6 @@
 package account.exceptions;
 
+import account.util.ResponseBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,43 +28,59 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class ExceptionHandlers extends ResponseEntityExceptionHandler {
 
+    private final ResponseBuilder responseBuilder = new ResponseBuilder();
+
     // Handler specifically for ResponseStatusException
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) { //, ResponseStatus responseStatus
-        ErrorResponse response = new ErrorResponse(ex.getStatusCode().value(), ex.getStatusCode().toString(), ex.getMessage(), request.getServletPath());
+        var response = responseBuilder
+                .setStatus(ex.getStatusCode().value())
+                .setError(ex.getStatusCode().toString())
+                .setMessage(ex.getMessage())
+                .setPath(request.getServletPath())
+                .build();
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
 
     //!! **************************************************** CUSTOM EXCEPTIONS
-    @ExceptionHandler({RequestValidationException.class, UserAlreadyExistsException.class, PasswordValidationException.class, PayrollNotFoundException.class})
+    @ExceptionHandler({
+            ConstraintViolationException.class,
+            JdbcSQLIntegrityConstraintViolationException.class,
+            RequestValidationException.class,
+            UserAlreadyExistsException.class,
+            PasswordValidationException.class,
+            PayrollNotFoundException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleRequestValidationException(RuntimeException ex, HttpServletRequest request) {
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(), request.getServletPath());
+        var response = responseBuilder
+                .badRequest()
+                .setMessage(ex.getMessage())
+                .setPath(request.getServletPath())
+                .build();
         return ResponseEntity.badRequest().body(response);
     }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(), request.getServletPath());
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    @ExceptionHandler(JdbcSQLIntegrityConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Object> handleJdbcConstraintViolation(JdbcSQLIntegrityConstraintViolationException ex, HttpServletRequest request) {
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage(), request.getServletPath());
-        return ResponseEntity.badRequest().body(response);
-    }
-
-
 
     //!! **************************************************** SPRING EXCEPTIONS
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         String path = extractPathFromWebRequest(request);
-        ErrorResponse response = new ErrorResponse(400, "Bad Request", ex.getMessage(), path);
+        var response = responseBuilder
+                .badRequest()
+                .setMessage(ex.getMessage())
+                .setPath(path)
+                .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String path = extractPathFromWebRequest(request);
+        var response = responseBuilder
+                .badRequest()
+                .setMessage(ex.getMessage())
+                .setPath(path)
+                .build();
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -74,7 +92,12 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
         String errors = ex.getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(" ; "));
-        ErrorResponse response = new ErrorResponse(400, "Bad Request", errors, path);
+        var response = responseBuilder
+                .setStatus(400)
+                .setError("Bad Request")
+                .setMessage(errors)
+                .setPath(path)
+                .build();
         return ResponseEntity.badRequest().body(response);
     }
 

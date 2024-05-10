@@ -54,7 +54,6 @@ public class AuthService implements UserDetailsService {
     public PasswordResetDTO updatePassword(PasswordResetDTO resetDTO, String userEmail) {
         // Validate password
         passwordValidator.validatePassword(resetDTO.getNewPassword());
-
         User user = userRepository.findByEmail(userEmail).orElseThrow(() -> {
             LOGGER.info("Error retrieving current user from database, email: {}", userEmail);
             return new CustomExceptions.UserNotFoundException(); });

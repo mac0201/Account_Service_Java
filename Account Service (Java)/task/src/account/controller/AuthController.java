@@ -1,19 +1,16 @@
 package account.controller;
 
-import account.exceptions.CustomExceptions;
 import account.model.User;
 import account.model.dto.PasswordResetDTO;
 import account.model.dto.UserRegistrationDTO;
 import account.service.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,14 +20,13 @@ public class AuthController {
 
     private final AuthService authService;
 
-
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
     // register user
-    @PostMapping("/signup")
-    public ResponseEntity<Object> signup(@Valid @RequestBody UserRegistrationDTO registration) {
+    @PostMapping(value = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> signup(@RequestBody @Valid UserRegistrationDTO registration) {
         User user = authService.registerUser(registration);
         return ResponseEntity.ok(user);
     }
