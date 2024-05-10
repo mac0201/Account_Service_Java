@@ -8,20 +8,20 @@ import lombok.*;
 @Setter
 @Getter
 public class UserRegistrationDTO {
-        @NotBlank
-        @Size(min = 2, max = 30)
+        @NotBlank(message = "Name cannot be blank!")
+        @Size(min = 2, max = 30, message = "Name must be between 2 and 30 characters long!")
         private String name;
 
-        @NotBlank
+        @NotBlank(message = "Last name cannot be blank!")
         @Size(min = 2, max = 30)
         private String lastname;
 
         @Email
-        @NotBlank
-        @Pattern(regexp = "^.+@acme\\.com$")
+        @NotBlank(message = "Email cannot be blank!")
+        @Pattern(regexp = "^.+@acme\\.com$", message = "Email must end with @acme.com")
         private String email;
 
-        @NotBlank
+        @NotBlank(message = "Password cannot be blank!")
         @ToString.Exclude
         private String password;
 

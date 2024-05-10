@@ -12,10 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -28,8 +30,7 @@ public class AuthController {
 
     // register user
     @PostMapping("/signup")
-    public ResponseEntity<Object> signup(@Valid @RequestBody UserRegistrationDTO registration, BindingResult bindingResult, HttpServletRequest req) throws JsonProcessingException, MethodArgumentNotValidException {
-        if(bindingResult.hasErrors()) throw new CustomExceptions.RequestValidationException();
+    public ResponseEntity<Object> signup(@Valid @RequestBody UserRegistrationDTO registration) {
         User user = authService.registerUser(registration);
         return ResponseEntity.ok(user);
     }

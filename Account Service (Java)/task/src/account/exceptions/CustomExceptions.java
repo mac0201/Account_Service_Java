@@ -24,4 +24,10 @@ public class CustomExceptions {
         public PasswordValidationException(String message) { super(message); }
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public static class PayrollNotFoundException extends RuntimeException {
+        public PayrollNotFoundException(String message) { super(message); }
+    }
+
+
 }

@@ -41,8 +41,10 @@ public class SecurityConfig {
                     .requestMatchers( "/api/admin/**").hasRole("ADMINISTRATOR")
                     // PAYROLL
                     .requestMatchers(HttpMethod.GET, "/api/empl/payment").hasAnyRole("USER", "ACCOUNTANT")
-                    .requestMatchers(HttpMethod.POST, "/api/acct/payments").hasRole("ACCOUNTANT")
-                    .requestMatchers(HttpMethod.PUT, "/api/acct/payments").hasRole("ACCOUNTANT")
+//                    .requestMatchers(HttpMethod.POST, "/api/acct/payments").hasRole("ACCOUNTANT")
+                    .requestMatchers(HttpMethod.POST, "/api/acct/payments").permitAll()
+//                    .requestMatchers(HttpMethod.PUT, "/api/acct/payments").hasRole("ACCOUNTANT")
+                    .requestMatchers(HttpMethod.PUT, "/api/acct/payments").permitAll()
                     // authenticate other requests
                     .anyRequest().authenticated()
             )
