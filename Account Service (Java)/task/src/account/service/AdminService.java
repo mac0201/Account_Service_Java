@@ -5,7 +5,7 @@ import account.model.User;
 import account.model.dto.UserDTO;
 import account.model.dto.UserRoleUpdateDTO;
 import account.repository.UserRepository;
-import account.service.roles.UserRole;
+import account.model.roles.UserRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;

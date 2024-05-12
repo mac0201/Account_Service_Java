@@ -1,6 +1,6 @@
 package account.model;
 
-import account.service.roles.UserRole;
+import account.model.roles.UserRole;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;

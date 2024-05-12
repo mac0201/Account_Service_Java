@@ -1,4 +1,4 @@
-package account.service.roles;
+package account.model.roles;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum UserRole {
     ADMINISTRATOR("ROLE_ADMINISTRATOR", RoleGroup.GROUP_ADMIN),
     USER("ROLE_USER", RoleGroup.GROUP_BUSINESS),
-    ACCOUNTANT("ROLE_ACCOUNTANT", RoleGroup.GROUP_BUSINESS);
+    ACCOUNTANT("ROLE_ACCOUNTANT", RoleGroup.GROUP_BUSINESS),
+    AUDITOR("ROLE_AUDITOR", RoleGroup.GROUP_BUSINESS);
     private final String name;
     private final RoleGroup roleGroup;
 

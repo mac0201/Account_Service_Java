@@ -1,6 +1,6 @@
 package account.model.dto;
 
-import account.service.roles.UserRole;
+import account.model.roles.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

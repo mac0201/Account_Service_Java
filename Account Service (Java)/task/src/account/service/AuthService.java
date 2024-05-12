@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static account.service.roles.UserRole.*;
+import static account.model.roles.UserRole.*;
 
 import account.exceptions.definitions.UserAuthExceptions.*;
 
