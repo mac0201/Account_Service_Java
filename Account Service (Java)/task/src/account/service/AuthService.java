@@ -1,8 +1,8 @@
 package account.service;
 
-import account.exceptions.CustomExceptions;
 import account.model.User;
 import account.model.dto.PasswordResetDTO;
+import account.model.dto.UserDTO;
 import account.model.dto.UserRegistrationDTO;
 import account.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -16,7 +16,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import static account.service.roles.UserRole.*;
+
+import account.exceptions.definitions.UserAuthExceptions.*;
+
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -29,47 +33,53 @@ public class AuthService implements UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
 
-    public User findUser(String email) {
-        return userRepository.findByEmailIgnoreCase(email).orElseThrow(CustomExceptions.UserNotFoundException::new);
+
+    private User getUser(String userEmail) {
+        return userRepository.findByEmailIgnoreCase(userEmail).orElseThrow(() -> {
+            LOGGER.info("Error retrieving current user from database, email: {}", userEmail);
+            return new UserNotFoundException(); });
     }
 
     @Transactional
-    public User registerUser(UserRegistrationDTO registrationDTO) {
+    public UserDTO registerUser(UserRegistrationDTO registrationDTO) {
         // Validate password
         passwordValidator.validatePassword(registrationDTO.getPassword());
-        if (userRepository.existsByEmailIgnoreCase(registrationDTO.getEmail())) {
-            LOGGER.debug("User with email {} already exists", registrationDTO.getEmail());
-            throw new CustomExceptions.UserAlreadyExistsException();
-        }
+
+        if (userRepository.existsByEmailIgnoreCase(registrationDTO.getEmail())) throw new UserAlreadyExistsException();
 
         User user = modelMapper.map(registrationDTO, User.class);
+
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        user.setAuthorities(List.of("ROLE_USER"));
+
+        if (userRepository.count() == 0) { // assign admin role to first user
+            user.setRoles(Set.of(ADMINISTRATOR));
+            LOGGER.warn("ADMIN ROLE ASSIGNED TO USER: {}", user.getEmail());
+        }
+        else user.setRoles(Set.of(USER));
 
         LOGGER.info("User registered - {}", user.getEmail());
-        return userRepository.save(user);
+        return modelMapper.map(
+                userRepository.save(user), UserDTO.class);
     }
 
     @Transactional
     public PasswordResetDTO updatePassword(PasswordResetDTO resetDTO, String userEmail) {
         // Validate password
         passwordValidator.validatePassword(resetDTO.getNewPassword());
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> {
-            LOGGER.info("Error retrieving current user from database, email: {}", userEmail);
-            return new CustomExceptions.UserNotFoundException(); });
+
+        User user = getUser(userEmail);
 
         if (passwordEncoder.matches(resetDTO.getNewPassword(), user.getPassword()))
-            throw new CustomExceptions.PasswordValidationException("The passwords must be different!");
+            throw new PasswordValidationException("The passwords must be different!");
 
         user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
         userRepository.save(user);
-
         return new PasswordResetDTO(userEmail, "The password has been updated successfully");
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = findUser(email);
+        User user = getUser(email);
         return modelMapper.map(user, UserDetails.class);
     }
 }

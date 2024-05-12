@@ -1,6 +1,6 @@
 package account.controller;
 
-import account.util.ResponseBuilder;
+import account.util.ResponseBuilders.SuccessResponse;
 import account.model.dto.PayrollCreateDTO;
 import account.model.dto.PayrollGetDTO;
 import account.service.PayrollService;
@@ -23,11 +23,9 @@ import java.util.List;
 public class PayrollController {
 
     private final PayrollService payrollService;
-    private final ResponseBuilder responseBuilder;
 
     public PayrollController(PayrollService payrollService) {
         this.payrollService = payrollService;
-        this.responseBuilder = new ResponseBuilder();
     }
 
     @GetMapping("/empl/payment")
@@ -46,13 +44,15 @@ public class PayrollController {
             @NotEmpty(message = "Payroll list cannot be empty!")
             List<@Valid PayrollCreateDTO> payrollList) {
         payrollService.addPayrolls(payrollList);
-        return ResponseEntity.ok().body(responseBuilder.setStatus("Added successfully!").build());
+        return ResponseEntity.ok().body(
+                SuccessResponse.builder().status("Added successfully!").build());
     }
 
     @PutMapping("/acct/payments")
     public ResponseEntity<Object> updatePayment(@RequestBody @Valid PayrollCreateDTO payrollDTO) {
         payrollService.updatePayroll(payrollDTO);
-        return ResponseEntity.ok().body(responseBuilder.setStatus("Updated successfully!").build());
+        return ResponseEntity.ok().body(
+                SuccessResponse.builder().status("Updated successfully!").build());
     }
 
 }

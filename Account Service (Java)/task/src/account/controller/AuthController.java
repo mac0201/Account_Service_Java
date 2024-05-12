@@ -1,10 +1,8 @@
 package account.controller;
 
-import account.model.User;
 import account.model.dto.PasswordResetDTO;
 import account.model.dto.UserRegistrationDTO;
 import account.service.AuthService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +25,16 @@ public class AuthController {
     // register user
     @PostMapping(value = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> signup(@RequestBody @Valid UserRegistrationDTO registration) {
-        User user = authService.registerUser(registration);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(authService.registerUser(registration));
     }
 
     // change password
     @PostMapping("/changepass")
-    public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordResetDTO reset, @AuthenticationPrincipal UserDetails userDetails) throws JsonProcessingException {
-        PasswordResetDTO response = authService.updatePassword(reset, userDetails.getUsername());
-        return ResponseEntity.ok().body(response);
+    public ResponseEntity<Object> changePassword(
+            @Valid @RequestBody PasswordResetDTO reset,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok().body(
+                authService.updatePassword(reset, userDetails.getUsername()));
     }
 
 }
