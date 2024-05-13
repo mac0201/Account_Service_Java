@@ -1,10 +1,8 @@
 package account.model.security.events;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Entity
 @Table(name = "logs")
@@ -12,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
+@Builder
 public class SecurityLog {
     @Id
     @Column(name = "log_id")
@@ -19,7 +19,8 @@ public class SecurityLog {
     private long date;
     @Enumerated(EnumType.STRING)
     private SecurityEventType action;
-    private String subject;
+    @Builder.Default
+    private String subject = "Anonymous";
     private String object;
     private String path;
 

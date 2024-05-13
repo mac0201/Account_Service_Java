@@ -4,6 +4,7 @@ import account.model.User;
 import account.model.dto.PasswordResetDTO;
 import account.model.dto.UserDTO;
 import account.model.dto.UserRegistrationDTO;
+import account.model.security.events.SecurityEventBroadcaster;
 import account.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static account.model.roles.UserRole.*;
+import static account.model.security.events.SecurityEventType.CREATE_USER;
+import static account.model.security.events.SecurityEventType.CHANGE_PASSWORD;
 
 import account.exceptions.definitions.UserAuthExceptions.*;
 
@@ -30,6 +33,8 @@ public class AuthService implements UserDetailsService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final PasswordValidator passwordValidator;
+
+    private final SecurityEventBroadcaster eventBroadcaster;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
 
@@ -54,10 +59,12 @@ public class AuthService implements UserDetailsService {
         if (userRepository.count() == 0) { // assign admin role to first user
             user.setRoles(Set.of(ADMINISTRATOR));
             LOGGER.warn("ADMIN ROLE ASSIGNED TO USER: {}", user.getEmail());
+            //! broadcast GRANT_ROLE event?
         }
         else user.setRoles(Set.of(USER));
 
         LOGGER.info("User registered - {}", user.getEmail());
+        eventBroadcaster.broadcastSecurityEvent(CREATE_USER, null, user.getEmail(), "path...");
         return modelMapper.map(
                 userRepository.save(user), UserDTO.class);
     }
@@ -74,6 +81,7 @@ public class AuthService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
         userRepository.save(user);
+        eventBroadcaster.broadcastSecurityEvent(CHANGE_PASSWORD, null, userEmail, "path...");
         return new PasswordResetDTO(userEmail, "The password has been updated successfully");
     }
 
