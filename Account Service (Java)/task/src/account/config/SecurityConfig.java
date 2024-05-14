@@ -58,6 +58,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/empl/payment").hasAnyRole("USER", "ACCOUNTANT")
                 .requestMatchers(HttpMethod.POST, "/api/acct/payments").hasRole("ACCOUNTANT")
                 .requestMatchers(HttpMethod.PUT, "/api/acct/payments").hasRole("ACCOUNTANT")
+                // AUDITOR
+                .requestMatchers(HttpMethod.GET, "/api/security/events").hasRole("AUDITOR")
                 // authenticate all other requests
                 .anyRequest().authenticated()
             );
