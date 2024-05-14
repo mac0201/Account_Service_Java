@@ -1,13 +1,26 @@
 package account.model.security.events;
 
+import account.repository.LogRepository;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class SecurityEventLogger {
 
-    public void handleSecurityEvent(SecurityLog log) {
-        System.out.println("HANDLING EVENT: " + log);
+    private final LogRepository logRepository;
+    private final static Logger LOGGER = LoggerFactory.getLogger(SecurityEventLogger.class);
+
+    public void handleSecurityEvent(SecurityEventType action, String subject, String object, String path) {
+        LOGGER.info("Handling security event: {}", action);
+        SecurityLog log = SecurityLog.builder()
+                .date(System.currentTimeMillis())
+                .action(action)
+                .subject(subject == null || subject.isEmpty() ? "Anonymous" : subject)
+                .object(object).path(path)
+                .build();
+        logRepository.save(log);
     }
-
-
 }

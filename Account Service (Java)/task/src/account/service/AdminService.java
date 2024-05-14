@@ -4,11 +4,12 @@ import account.exceptions.definitions.AdminExceptions.*;
 import account.model.User;
 import account.model.dto.UserDTO;
 import account.model.dto.UserRoleUpdateDTO;
-import account.model.security.events.SecurityEventBroadcaster;
+//import account.model.security.events.SecurityEventBroadcaster;
+import account.model.security.events.SecurityEventLogger;
 import account.model.security.events.SecurityEventType;
-import account.model.security.events.SecurityLog;
 import account.repository.UserRepository;
 import account.model.roles.UserRole;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,8 +33,12 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final AuthService authService;
 
-    private final SecurityEventBroadcaster eventBroadcaster;
+    private final SecurityEventLogger eventLogger;
+    private HttpServletRequest requestContext;
+
+//    private final SecurityEventBroadcaster eventBroadcaster;
 
     public User findUser(String email) {
         return userRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
@@ -52,7 +57,7 @@ public class AdminService {
         if (user.getRoles().contains(UserRole.ADMINISTRATOR)) throw new DeleteAdminException();
         userRepository.delete(user);
         // Get info about current user
-        eventBroadcaster.broadcastSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email, "path...");
+//        eventBroadcaster.broadcastSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email, "path...");
     }
 
     @Transactional
@@ -89,7 +94,8 @@ public class AdminService {
         }
         userRepository.save(user);
         LOGGER.info("{} ROLE {} - user {}", dto.getOperation(), dto.getRole(), dto.getUser());
-        eventBroadcaster.broadcastSecurityEvent(securityAction, getAdminEmailFromContext(), user.getEmail(), "path...");
+        eventLogger.handleSecurityEvent(securityAction, getAdminEmailFromContext(), user.getEmail(), requestContext.getServletPath());
+//        eventBroadcaster.broadcastSecurityEvent(securityAction, getAdminEmailFromContext(), user.getEmail(), "path...");
         return modelMapper.map(user, UserDTO.class);
     }
 
@@ -97,4 +103,49 @@ public class AdminService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
+    public void updateUserAccess(String operation, String user, String requestPath) {
+        String requestBy = null;
+        try {
+            // retrieve email if admin made the request
+            requestBy = SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (NullPointerException ignored) { }
+
+        switch (operation) {
+            case "LOCK" -> lockUser(user, requestPath, requestBy);
+            case "UNLOCK" -> unlockUser(user, requestBy);
+            default -> throw new IllegalArgumentException("Unknown operation: " + operation);
+        }
+    }
+
+    private void unlockUser(String email, String requestBy) {
+        User user = findUser(email);
+        if (user.isAccountLocked()) {
+            user.lockAccount(false);
+            System.out.printf("Account %s unlocked!", email);
+            userRepository.save(user);
+            eventLogger.handleSecurityEvent(SecurityEventType.UNLOCK_USER, requestBy, email, requestContext.getServletPath());
+        } else {
+            System.out.println("ACCOUNT NOT LOCKED!");
+        }
+    }
+
+    private void lockUser(String email, String requestPath, String requestBy) {
+        try {
+            User user = findUser(email);
+            if (user.getRoles().contains(UserRole.ADMINISTRATOR)) throw new DeleteAdminException();
+
+            if (user.isAccountNonLocked()) {
+                System.out.println(user.getEmail() + " ACCOUNT IS UNLOCKED - LOCKING...");
+                user.lockAccount(true);
+                userRepository.save(user);
+                eventLogger.handleSecurityEvent(
+                        SecurityEventType.LOCK_USER, requestBy, email,
+                        requestPath != null ? requestPath : requestContext.getServletPath());
+            } else {
+                System.out.println("ACCOUNT IS ALREADY LOCKED!!");
+            }
+        } catch (UserNotFoundException ex) {
+            System.err.println("User not found exception ignored");
+        }
+    }
 }

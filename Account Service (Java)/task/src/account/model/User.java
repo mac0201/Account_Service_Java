@@ -35,10 +35,17 @@ public class User implements UserDetails {
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING) //!!!
     private Set<UserRole> roles;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<Payroll> payrolls;
+
+    private boolean accountLocked = false;
+
+    public void lockAccount(boolean lock) {
+        this.accountLocked = lock;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,7 +64,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !accountLocked;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package account.controller;
 
+import account.model.dto.UserAccessUpdateDTO;
 import account.model.dto.UserDTO;
 import account.model.dto.UserRoleUpdateDTO;
 import account.service.AdminService;
@@ -39,5 +40,11 @@ public class AdminController {
                 .status("Deleted successfully!")
                 .build();
         return ResponseEntity.ok().body(response);
+    }
+
+    @PutMapping(value = "/access")
+    public ResponseEntity<Object> updateUserAccess(@RequestBody UserAccessUpdateDTO accessDTO) {
+        adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser(), null);
+        return ResponseEntity.ok().body(accessDTO);
     }
 }

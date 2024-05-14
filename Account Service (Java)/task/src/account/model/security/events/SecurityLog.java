@@ -15,6 +15,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public class SecurityLog {
     @Id
     @Column(name = "log_id")
+    @SequenceGenerator(name = "log_seq", sequenceName = "log_seq", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(generator = "log_seq", strategy = GenerationType.SEQUENCE)
     private long id;
     private long date;
     @Enumerated(EnumType.STRING)
