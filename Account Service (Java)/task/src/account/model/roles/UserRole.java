@@ -22,9 +22,4 @@ public enum UserRole {
         GROUP_ADMIN,
         GROUP_BUSINESS
     }
-
-    public enum RoleModifyOperation {
-        GRANT,
-        REMOVE
-    }
 }

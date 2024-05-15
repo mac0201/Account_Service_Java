@@ -4,7 +4,6 @@ import account.model.User;
 import account.model.dto.PasswordResetDTO;
 import account.model.dto.UserDTO;
 import account.model.dto.UserRegistrationDTO;
-//import account.model.security.events.SecurityEventBroadcaster;
 import account.model.security.events.SecurityEventLogger;
 import account.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +12,6 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import static account.model.roles.UserRole.*;
 import static account.model.security.events.SecurityEventType.CREATE_USER;
 import static account.model.security.events.SecurityEventType.CHANGE_PASSWORD;
-import static account.model.security.events.SecurityEventType.GRANT_ROLE;
 
 import account.exceptions.definitions.UserAuthExceptions.*;
 

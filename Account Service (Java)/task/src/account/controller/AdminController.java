@@ -1,8 +1,7 @@
 package account.controller;
 
-import account.model.dto.UserAccessUpdateDTO;
 import account.model.dto.UserDTO;
-import account.model.dto.UserRoleUpdateDTO;
+import account.model.dto.UserUpdateDTO;
 import account.service.AdminService;
 import account.util.ResponseBuilders.SuccessResponse;
 import jakarta.validation.Valid;
@@ -28,12 +27,12 @@ public class AdminController {
     }
 
     @PutMapping("/role")
-    public ResponseEntity<Object> updateRole(@Valid @RequestBody UserRoleUpdateDTO dto) {
+    public ResponseEntity<Object> updateRole(@Valid @RequestBody UserUpdateDTO dto) {
         return ResponseEntity.ok().body(adminService.updateUserRole(dto));
     }
 
     @DeleteMapping(value = {"/{email}", ""})
-    public ResponseEntity<Object> deleteUser(@PathVariable(required = true) String email) {
+    public ResponseEntity<Object> deleteUser(@PathVariable String email) {
         adminService.deleteUser(email);
         var response = SuccessResponse.builder()
                 .user(email)
@@ -43,8 +42,10 @@ public class AdminController {
     }
 
     @PutMapping(value = "/access")
-    public ResponseEntity<Object> updateUserAccess(@RequestBody UserAccessUpdateDTO accessDTO) {
-        adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser().toLowerCase(), null);
+//    public ResponseEntity<Object> updateUserAccess(@RequestBody UserAccessUpdateDTO accessDTO) {
+    public ResponseEntity<Object> updateUserAccess(@RequestBody UserUpdateDTO accessDTO) {
+        adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser(), null);
+        System.out.println("UPDATE ACCESS FOR: " + accessDTO.getUser());
         var response = SuccessResponse.builder().status("User %s %s!".formatted(accessDTO.getUser().toLowerCase(),
                 accessDTO.getOperation().equals("LOCK") ? "locked" : "unlocked")).build();
         return ResponseEntity.ok().body(response);
