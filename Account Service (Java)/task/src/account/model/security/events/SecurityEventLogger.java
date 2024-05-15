@@ -13,14 +13,16 @@ public class SecurityEventLogger {
     private final LogRepository logRepository;
     private final static Logger LOGGER = LoggerFactory.getLogger(SecurityEventLogger.class);
 
-    public void handleSecurityEvent(SecurityEventType action, String subject, String object, String path) {
+    public SecurityLog handleSecurityEvent(SecurityEventType action, String subject, String object, String path) {
         LOGGER.info("Handling security event: {}", action);
         SecurityLog log = SecurityLog.builder()
                 .date(System.currentTimeMillis())
                 .action(action)
                 .subject(subject == null || subject.isEmpty() ? "Anonymous" : subject)
-                .object(object).path(path)
+                .object(object)
+                .path(path == null ? "path" : path)
                 .build();
         logRepository.save(log);
+        return log;
     }
 }

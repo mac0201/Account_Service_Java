@@ -44,7 +44,9 @@ public class AdminController {
 
     @PutMapping(value = "/access")
     public ResponseEntity<Object> updateUserAccess(@RequestBody UserAccessUpdateDTO accessDTO) {
-        adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser(), null);
-        return ResponseEntity.ok().body(accessDTO);
+        adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser().toLowerCase(), null);
+        var response = SuccessResponse.builder().status("User %s %s!".formatted(accessDTO.getUser().toLowerCase(),
+                accessDTO.getOperation().equals("LOCK") ? "locked" : "unlocked")).build();
+        return ResponseEntity.ok().body(response);
     }
 }

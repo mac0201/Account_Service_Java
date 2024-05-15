@@ -8,7 +8,7 @@ public class ResponseBuilders {
 
     @Data
     @Builder
-//    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ErrorResponse {
         private int status;
         private String error;

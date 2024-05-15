@@ -58,8 +58,8 @@ public class AuthService implements UserDetailsService {
 
         if (userRepository.count() == 0) { // assign admin role to first user
             user.setRoles(Set.of(ADMINISTRATOR));
-            LOGGER.warn("ADMIN ROLE ASSIGNED TO USER: {}", user.getEmail());
-            eventLogger.handleSecurityEvent(GRANT_ROLE, null, "ADMIN : " + user.getEmail(), requestContext.getServletPath());
+//            LOGGER.warn("ADMIN ROLE ASSIGNED TO USER: {}", user.getEmail());
+//            eventLogger.handleSecurityEvent(GRANT_ROLE, null, "ADMIN : " + user.getEmail(), requestContext.getServletPath());
         }
         else user.setRoles(Set.of(USER));
 
@@ -83,7 +83,7 @@ public class AuthService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
         userRepository.save(user);
 //        eventBroadcaster.broadcastSecurityEvent(CHANGE_PASSWORD, null, userEmail, requestContext.getServletPath());
-        eventLogger.handleSecurityEvent(CHANGE_PASSWORD, null, user.getEmail(), requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(CHANGE_PASSWORD, user.getEmail(), user.getEmail(), requestContext.getServletPath());
         return new PasswordResetDTO(userEmail, "The password has been updated successfully");
     }
 

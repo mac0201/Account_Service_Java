@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface UserRepository extends CrudRepository<User, Long> {
     List<User> findAll();
     boolean existsByEmailIgnoreCase(String email);
+//    boolean isLocked(String email);
+    boolean existsByEmailIgnoreCaseAndAccountLockedTrue(String email);
     Optional<User> findByEmailIgnoreCase(String email);
 }

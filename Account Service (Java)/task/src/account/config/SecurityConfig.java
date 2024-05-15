@@ -59,16 +59,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/acct/payments").hasRole("ACCOUNTANT")
                 .requestMatchers(HttpMethod.PUT, "/api/acct/payments").hasRole("ACCOUNTANT")
                 // AUDITOR
-                .requestMatchers(HttpMethod.GET, "/api/security/events").hasRole("AUDITOR")
+                .requestMatchers(HttpMethod.GET, "/api/security/**").hasRole("AUDITOR")
                 // authenticate all other requests
                 .anyRequest().authenticated()
             );
 
-        http.exceptionHandling()
-                .authenticationEntryPoint(authEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler);
 
-        http.httpBasic(Customizer.withDefaults());
+
+//        http.httpBasic(Customizer.withDefaults());
+        http.httpBasic().authenticationEntryPoint(authEntryPoint);
+        http.exceptionHandling()
+//                .authenticationEntryPoint(authEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler);
         http.csrf().disable();  // For Postman
         http.headers().frameOptions().disable(); // For H2 console
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // Disable sessions

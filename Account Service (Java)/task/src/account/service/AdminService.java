@@ -58,12 +58,14 @@ public class AdminService {
         userRepository.delete(user);
         // Get info about current user
 //        eventBroadcaster.broadcastSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email, "path...");
+        eventLogger.handleSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email, requestContext.getServletPath());
     }
 
     @Transactional
     public UserDTO updateUserRole(UserRoleUpdateDTO dto) {
         User user = findUser(dto.getUser());
         SecurityEventType securityAction = null;
+        String eventObject = null;
         try {
             var targetRole = UserRole.valueOf(dto.getRole());
             switch (dto.getOperation()) {
@@ -75,6 +77,7 @@ public class AdminService {
                     // checks completed, add new role
                     user.getRoles().add(targetRole);
                     securityAction = GRANT_ROLE;
+                    eventObject = "Grant role %s to %s".formatted(dto.getRole(), user.getEmail());
                 }
                 case REMOVE -> {
                     var userRoles = user.getRoles();
@@ -87,6 +90,7 @@ public class AdminService {
 
                     user.getRoles().remove(targetRole);
                     securityAction = REMOVE_ROLE;
+                    eventObject = "Remove role %s from %s".formatted(dto.getRole(), user.getEmail());
                 }
             }
         } catch (IllegalArgumentException | NoSuchElementException e) {
@@ -94,7 +98,7 @@ public class AdminService {
         }
         userRepository.save(user);
         LOGGER.info("{} ROLE {} - user {}", dto.getOperation(), dto.getRole(), dto.getUser());
-        eventLogger.handleSecurityEvent(securityAction, getAdminEmailFromContext(), user.getEmail(), requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(securityAction, getAdminEmailFromContext(), eventObject, requestContext.getServletPath());
 //        eventBroadcaster.broadcastSecurityEvent(securityAction, getAdminEmailFromContext(), user.getEmail(), "path...");
         return modelMapper.map(user, UserDTO.class);
     }
@@ -103,12 +107,24 @@ public class AdminService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
+    public boolean isUserNonLocked(String email) {
+        try {
+            User user = findUser(email);
+//        return userRepository.existsByEmailIgnoreCaseAndAccountLockedTrue(email);
+            return user.isAccountNonLocked();
+        } catch (UserNotFoundException ex) {
+            return true;
+        }
+    }
+
     public void updateUserAccess(String operation, String user, String requestPath) {
         String requestBy = null;
         try {
             // retrieve email if admin made the request
             requestBy = SecurityContextHolder.getContext().getAuthentication().getName();
-        } catch (NullPointerException ignored) { }
+        } catch (NullPointerException ignored) {
+            requestBy = user;
+        }
 
         switch (operation) {
             case "LOCK" -> lockUser(user, requestPath, requestBy);
@@ -117,16 +133,17 @@ public class AdminService {
         }
     }
 
-    private void unlockUser(String email, String requestBy) {
+    private boolean unlockUser(String email, String requestBy) {
         User user = findUser(email);
         if (user.isAccountLocked()) {
             user.lockAccount(false);
             System.out.printf("Account %s unlocked!", email);
             userRepository.save(user);
-            eventLogger.handleSecurityEvent(SecurityEventType.UNLOCK_USER, requestBy, email, requestContext.getServletPath());
+            eventLogger.handleSecurityEvent(SecurityEventType.UNLOCK_USER, requestBy, "Unlock user " + email, requestContext.getServletPath());
         } else {
             System.out.println("ACCOUNT NOT LOCKED!");
         }
+        return true;
     }
 
     private void lockUser(String email, String requestPath, String requestBy) {
@@ -139,13 +156,15 @@ public class AdminService {
                 user.lockAccount(true);
                 userRepository.save(user);
                 eventLogger.handleSecurityEvent(
-                        SecurityEventType.LOCK_USER, requestBy, email,
+                        SecurityEventType.LOCK_USER, requestBy, "Lock user " +email,
                         requestPath != null ? requestPath : requestContext.getServletPath());
             } else {
                 System.out.println("ACCOUNT IS ALREADY LOCKED!!");
             }
         } catch (UserNotFoundException ex) {
-            System.err.println("User not found exception ignored");
+//            System.err.println("User not found exception ignored");
+            // throw exception only if admin requested the lock (otherwise it was invoked by authentication handler)
+            if (requestBy != null) throw new UserNotFoundException();
         }
     }
 }

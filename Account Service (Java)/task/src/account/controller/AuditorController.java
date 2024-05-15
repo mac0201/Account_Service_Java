@@ -14,7 +14,7 @@ public class AuditorController {
 
     private final AuditorService auditorService;
 
-    @GetMapping("/events")
+    @GetMapping("/events/")
     public ResponseEntity<Object> findAllLogs() {
         return ResponseEntity.ok().body(auditorService.findAllLogs());
     }
