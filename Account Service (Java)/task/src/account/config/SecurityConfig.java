@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -41,6 +43,16 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(15, new SecureRandom());
     }
+
+    @Bean
+    public Map<String, Integer> loginAttemptsCache() {
+        return new ConcurrentHashMap<>();
+    }
+
+//    @Bean
+//    public Cache loginAttemptsCache() {
+//        return new ConcurrentMapCache("loginAttempts");
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, RestAuthenticationEntryPoint authEntryPoint, CustomAccessDeniedHandler accessDeniedHandler) throws Exception {

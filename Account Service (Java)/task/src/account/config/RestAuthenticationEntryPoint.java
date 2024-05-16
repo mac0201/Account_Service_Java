@@ -35,83 +35,25 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        // handle exception when accessing account that does not exist
+        String attemptEmail = retrieveAuthorizationEmail(request.getHeader("Authorization"));
+        String requestPath = request.getServletPath();
 
-//        throw new Authent
-
-        String requestPath = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-        requestPath = requestPath == null ? request.getServletPath() : requestPath;
-
-
-        var responseBuilder = ResponseBuilders.ErrorResponse.builder();
-//        responseBuilder.status(401);
-//        responseBuilder.error("Unauthorized");
-        SecurityLog eventLog = null;
-
-
-
-
-//        System.out.println("REQUEST PATH: " + requestPath);
-//        System.out.println("REQUEST URI: " + request.getRequestURI());
-        if (requestPath != null && !requestPath.equals("/favicon.ico")) { // h2-console
-            String userEmail = retrieveAuthorizationEmail(request.getHeader("authorization"));
-            if (!userEmail.equals("Anonymous")) {
-
-
-
-//                responseBuilder.path(requestPath);
-
-                System.err.println("SETTING PATH....");
-                responseBuilder.path(requestPath);
-                // Is account already locked?
-
-                if (adminService.isUserNonLocked(userEmail)) {
-
-                    attemptCounters.putIfAbsent(userEmail, 0);
-                    int attemptCount = attemptCounters.get(userEmail) + 1;
-                    attemptCounters.put(userEmail, attemptCount);
-
-//            eventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, null, userEmail, requestPath);
-                    eventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, userEmail, requestPath, requestPath);
-
-
-                    // lock account if more than 5 attempts
-                    if (attemptCount == 5) {
-                        // reset counter for user
-                        attemptCounters.put(userEmail, 0);
-                        eventLogger.handleSecurityEvent(SecurityEventType.BRUTE_FORCE, userEmail, requestPath, requestPath);
-                        adminService.updateUserAccess("LOCK", userEmail, requestPath);
-//                securityEventLogger.handleSecurityEvent(SecurityEventType.BRUTE_FORCE, null, userEmail, requestPath);
-                    }
-
-
-                }
-            }
-        } else if (requestPath == null) {
-            System.err.println("Path null...");
+        // if email does not end with @acme, skip logging
+        if (!attemptEmail.endsWith("@acme.com") && !requestPath.equals("/error") && !attemptEmail.equals("Anonymous")) {
+            eventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, attemptEmail, requestPath, requestPath);
         }
-
-        responseBuilder.status(401);
-        responseBuilder.error("Unauthorized");
-        responseBuilder.message(authException.getMessage());
-
-//        System.out.println(responseBuilder.build());
-
-
 
         response.setStatus(401);
         response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(responseBuilder.build()));
+
+        var resp = ResponseBuilders.ErrorResponse.builder().status(401).error("Unauthorized").message(authException.getMessage()).path(requestPath).build();
+
+        response.getWriter().write(objectMapper.writeValueAsString(resp));
         response.getWriter().flush();
-//        response.getOutputStream().flush();
+
 //        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-
-
-
-
-        //
-//        response.setStatus(401);
-//
     }
 
     private String retrieveAuthorizationEmail(String authHeader) {

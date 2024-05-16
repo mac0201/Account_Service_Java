@@ -32,7 +32,7 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final AuthService authService;
+//    private final AuthService authService;
 
     private final SecurityEventLogger eventLogger;
     private HttpServletRequest requestContext;
@@ -191,7 +191,7 @@ public class AdminService {
     private void lockUser(String email, String requestPath, String requestBy) {
         try {
             User user = findUser(email);
-            if (user.getRoles().contains(UserRole.ADMINISTRATOR)) throw new DeleteAdminException();
+            if (user.getRoles().contains(UserRole.ADMINISTRATOR)) throw new LockAdminException();
 
             if (user.isAccountNonLocked()) {
                 System.out.println(user.getEmail() + " ACCOUNT IS UNLOCKED - LOCKING...");

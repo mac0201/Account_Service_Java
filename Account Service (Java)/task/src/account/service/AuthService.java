@@ -6,6 +6,7 @@ import account.model.dto.UserDTO;
 import account.model.dto.UserRegistrationDTO;
 import account.model.security.events.SecurityEventLogger;
 import account.repository.UserRepository;
+import account.service.security.LoginAttemptService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,7 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordValidator passwordValidator;
 
+    private final LoginAttemptService loginAttemptService;
     private final SecurityEventLogger eventLogger;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
@@ -86,6 +88,10 @@ public class AuthService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+//
+//        if (loginAttemptService.isBlocked(email)) {
+//            throw new UsernameNotFoundException(email);
+//        }
         User user = getUser(email);
         return modelMapper.map(user, UserDetails.class);
     }

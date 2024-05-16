@@ -17,6 +17,11 @@ public class AdminExceptions {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class LockAdminException extends AdminServiceException {
+        public LockAdminException() { super("Can't lock the ADMINISTRATOR!", 400); }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static class UserRoleNotAssigned extends AdminServiceException {
         public UserRoleNotAssigned() { super("The user does not have a role!", 400); }
     }
