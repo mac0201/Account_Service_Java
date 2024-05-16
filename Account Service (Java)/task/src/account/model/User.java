@@ -35,7 +35,7 @@ public class User implements UserDetails {
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING) //!!!
+    @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)

@@ -22,4 +22,8 @@ public enum UserRole {
         GROUP_ADMIN,
         GROUP_BUSINESS
     }
+
+    public boolean isGroupAdmin() {
+        return this.roleGroup == RoleGroup.GROUP_ADMIN;
+    }
 }

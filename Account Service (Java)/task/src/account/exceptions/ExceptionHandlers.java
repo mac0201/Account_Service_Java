@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,13 +38,6 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
                 .path(request.getServletPath())
                 .build();
         return ResponseEntity.status(status).body(response);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
-        System.err.println("HANDLING AUTH EXCEPTION!");
-        return ResponseEntity.status(401).build();
     }
 
     //!! **************************************************** CUSTOM EXCEPTIONS

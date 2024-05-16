@@ -13,8 +13,8 @@ public class SecurityEventLogger {
     private final LogRepository logRepository;
     private final static Logger LOGGER = LoggerFactory.getLogger(SecurityEventLogger.class);
 
-    public SecurityLog handleSecurityEvent(SecurityEventType action, String subject, String object, String path) {
-        LOGGER.info("Handling security event: {}", action);
+    public void handleSecurityEvent(SecurityEventType action, String subject, String object, String path) {
+        LOGGER.info("Handling security event {} on path \"{}\"", action, path);
         SecurityLog log = SecurityLog.builder()
                 .date(System.currentTimeMillis())
                 .action(action)
@@ -23,6 +23,5 @@ public class SecurityEventLogger {
                 .path(path == null ? "path" : path)
                 .build();
         logRepository.save(log);
-        return log;
     }
 }

@@ -42,11 +42,9 @@ public class AdminController {
     }
 
     @PutMapping(value = "/access")
-//    public ResponseEntity<Object> updateUserAccess(@RequestBody UserAccessUpdateDTO accessDTO) {
     public ResponseEntity<Object> updateUserAccess(@RequestBody UserUpdateDTO accessDTO) {
         adminService.updateUserAccess(accessDTO.getOperation(), accessDTO.getUser(), null);
-        System.out.println("UPDATE ACCESS FOR: " + accessDTO.getUser());
-        var response = SuccessResponse.builder().status("User %s %s!".formatted(accessDTO.getUser().toLowerCase(),
+        var response = SuccessResponse.builder().status("User %s %s!".formatted(accessDTO.getUser(),
                 accessDTO.getOperation().equals("LOCK") ? "locked" : "unlocked")).build();
         return ResponseEntity.ok().body(response);
     }
