@@ -8,12 +8,10 @@ import account.model.security.events.SecurityEventLogger;
 import account.model.security.events.SecurityEventType;
 import account.repository.UserRepository;
 import account.model.roles.UserRole;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +30,6 @@ public class AdminService {
     private final ModelMapper modelMapper;
     private final SecurityEventLogger eventLogger;
     private final Logger appLogger;
-    private HttpServletRequest requestContext;
 
     public User findUser(String email) {
         return userRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
@@ -51,7 +48,7 @@ public class AdminService {
         if (user.getRoles().contains(UserRole.ADMINISTRATOR)) throw new DeleteAdminException();
         userRepository.delete(user);
         appLogger.info("User {} DELETED", email);
-        eventLogger.handleSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email, requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(DELETE_USER, getAdminEmailFromContext(), email);
     }
 
     @Transactional
@@ -91,7 +88,7 @@ public class AdminService {
         }
         userRepository.save(user);
         appLogger.info("{} ROLE {} - user {}", dto.getOperation(), dto.getRole(), dto.getUser());
-        eventLogger.handleSecurityEvent(securityAction, getAdminEmailFromContext(), eventObject, requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(securityAction, getAdminEmailFromContext(), eventObject);
         return modelMapper.map(user, UserDTO.class);
     }
 
@@ -117,7 +114,7 @@ public class AdminService {
             user.lockAccount(false);
             userRepository.save(user);
             appLogger.info("User {} UNLOCKED", email);
-            eventLogger.handleSecurityEvent(SecurityEventType.UNLOCK_USER, requestBy, "Unlock user " + email, requestContext.getServletPath());
+            eventLogger.handleSecurityEvent(SecurityEventType.UNLOCK_USER, requestBy, "Unlock user " + email);
         }
     }
 
@@ -131,8 +128,8 @@ public class AdminService {
                 userRepository.save(user);
                 appLogger.info("User {} LOCKED", email);
                 eventLogger.handleSecurityEvent(
-                        SecurityEventType.LOCK_USER, requestBy, "Lock user " +email,
-                        requestPath != null ? requestPath : requestContext.getServletPath());
+                        SecurityEventType.LOCK_USER, requestBy, "Lock user " + email);
+                // requestPath != null ? requestPath : requestContext.getServletPath()
             }
         } catch (UserNotFoundException ex) {
             if (requestBy != null) throw new UserNotFoundException();

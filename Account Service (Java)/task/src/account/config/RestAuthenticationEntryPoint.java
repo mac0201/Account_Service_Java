@@ -29,7 +29,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         // if email does not end with @acme, skip logging (temporary solution)
         if (!attemptEmail.endsWith("@acme.com") && !attemptEmail.equals("Anonymous") && !requestPath.equals("/error")) {
-            eventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, attemptEmail, requestPath, requestPath);
+            eventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, attemptEmail, requestPath);
         }
 
         response.setStatus(401);

@@ -2,7 +2,6 @@ package account.config;
 
 import account.model.security.events.SecurityEventLogger;
 import account.model.security.events.SecurityEventType;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -69,7 +68,7 @@ public class SecurityConfig {
         @Override
         public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
             String user = SecurityContextHolder.getContext().getAuthentication().getName();
-            eventLogger.handleSecurityEvent(SecurityEventType.ACCESS_DENIED, user, request.getServletPath(), request.getServletPath());
+            eventLogger.handleSecurityEvent(SecurityEventType.ACCESS_DENIED, user, request.getServletPath());
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied!");
         }
     }

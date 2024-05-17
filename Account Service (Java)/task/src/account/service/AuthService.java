@@ -7,7 +7,6 @@ import account.model.dto.UserRegistrationDTO;
 import account.model.security.events.SecurityEventLogger;
 import account.repository.UserRepository;
 import account.service.security.PasswordValidator;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -37,7 +36,6 @@ public class AuthService implements UserDetailsService {
     private final SecurityEventLogger eventLogger;
 
     private final Logger appLogger;
-    private HttpServletRequest requestContext;
 
     private User getUser(String userEmail) {
         return userRepository.findByEmailIgnoreCase(userEmail).orElseThrow(UserNotFoundException::new);
@@ -58,7 +56,7 @@ public class AuthService implements UserDetailsService {
         else user.setRoles(Set.of(USER));
 
         appLogger.debug("User registered - {}", user.getEmail());
-        eventLogger.handleSecurityEvent(CREATE_USER, null, user.getEmail(), requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(CREATE_USER, null, user.getEmail());
 
         return modelMapper.map(
                 userRepository.save(user), UserDTO.class);
@@ -77,7 +75,7 @@ public class AuthService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
         userRepository.save(user);
         appLogger.debug("Updated password for user {}", userEmail);
-        eventLogger.handleSecurityEvent(CHANGE_PASSWORD, user.getEmail(), user.getEmail(), requestContext.getServletPath());
+        eventLogger.handleSecurityEvent(CHANGE_PASSWORD, user.getEmail(), user.getEmail());
         return new PasswordResetDTO(userEmail, "The password has been updated successfully");
     }
 

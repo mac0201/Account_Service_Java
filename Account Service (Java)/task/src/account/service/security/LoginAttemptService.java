@@ -35,11 +35,11 @@ public class LoginAttemptService {
 
         // log failed login attempt
         String requestPath = request.getRequestURI();
-        securityEventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, userEmail, requestPath, requestPath);
+        securityEventLogger.handleSecurityEvent(SecurityEventType.LOGIN_FAILED, userEmail, requestPath);
 
         if (attempts == MAX_ATTEMPT) {
             logger.info("Locking user {} due to too many failed login attempts", userEmail);
-            securityEventLogger.handleSecurityEvent(SecurityEventType.BRUTE_FORCE, userEmail, requestPath, requestPath);
+            securityEventLogger.handleSecurityEvent(SecurityEventType.BRUTE_FORCE, userEmail, requestPath);
             adminService.updateUserAccess("LOCK", userEmail, requestPath); // lock user account
         }
     }
